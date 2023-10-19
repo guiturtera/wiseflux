@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using Wiseflux.Models;
 
 namespace Wiseflux.Data
@@ -10,13 +11,17 @@ namespace Wiseflux.Data
 
         }
 
-        /*protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-           builder.Entity<Spreadsheet>().HasKey(table => new {
+            /*builder.Entity<Spreadsheet>().HasKey(table => new
+            {
                 table.User,
                 table.Day
-            })
-        }*/
+            });*/
+
+            //builder.Entity<PhoneNumber>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
+
+        }
 
         public DbSet<User> Users { get; set; } // STRONG
         //public DbSet<Spreadsheet> Spreadsheets { get; set; } // ASSOCIATIVE

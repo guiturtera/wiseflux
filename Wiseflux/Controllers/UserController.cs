@@ -26,7 +26,7 @@ namespace Wiseflux.Controllers
         public ActionResult GetCurrentUserInfo()
         {
             var claims = User.Identities.First().Claims.ToList();
-            string cpf = claims?.FirstOrDefault(x => x.Type.Equals("cpf", StringComparison.OrdinalIgnoreCase)).Value;
+            string? cpf = claims?.FirstOrDefault(x => x.Type.Equals("email", StringComparison.OrdinalIgnoreCase)).Value;
             var user = _db.Users.Find(cpf);
             return new JsonResult(user);
         }
@@ -110,7 +110,7 @@ namespace Wiseflux.Controllers
         {
             // Chose to add validation here. Could add in Schemas 
             HttpResponseMessage errorResponse;
-            if (!ValidUser(newUser, out errorResponse) || !ValidateUserNotExists(newUser.CPF, out errorResponse))
+            if (!ValidUser(newUser, out errorResponse) || !ValidateUserNotExists(newUser.Email, out errorResponse))
                 return new JsonResult(errorResponse);
 
             newUser.Password = new UserSecurity().EncryptPassword(newUser.Password);
@@ -149,7 +149,7 @@ namespace Wiseflux.Controllers
             {
                 errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.NotFound)
                 {
-                    Content = new StringContent($"User with {user.CPF} doesn't exist. Try adding before editing."),
+                    Content = new StringContent($"User with email '{user.Email}' doesn't exist. Try adding before editing."),
                     ReasonPhrase = "User don't exist"
                 };
                 return new JsonResult(errorResponse);
@@ -200,15 +200,15 @@ namespace Wiseflux.Controllers
             return userExists;
         }
 
-        private bool ValidateUserNotExists(string cpf, out HttpResponseMessage errorResponse)
+        private bool ValidateUserNotExists(string email, out HttpResponseMessage errorResponse)
         {
             errorResponse = null;
-            bool valid = !UserExists(cpf, out User user);
+            bool valid = !UserExists(email, out User user);
             if (!valid)
             {
                 errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
                 {
-                    Content = new StringContent($"User with CPF `{cpf}` already exists"),
+                    Content = new StringContent($"User with email `{email}` already exists"),
                     ReasonPhrase = "User already exists"
                 };
             }
