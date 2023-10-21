@@ -5,8 +5,8 @@ using Wiseflux.Models;
 using Wiseflux.Security;
 
 namespace Wiseflux.Controllers
-{
-    [Route("api/[controller]")]
+{ 
+    [Route($"api/v1/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -22,72 +22,32 @@ namespace Wiseflux.Controllers
         /// </summary>
         [HttpGet("info")]
         [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(IEnumerable<User>))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
         [Authorize]
         public ActionResult GetCurrentUserInfo()
         {
             var claims = User.Identities.First().Claims.ToList();
-            string? cpf = claims?.FirstOrDefault(x => x.Type.Equals("email", StringComparison.OrdinalIgnoreCase)).Value;
-            var user = _db.Users.Find(cpf);
-            return new JsonResult(user);
-        }
-
-        /// <summary>
-        /// Returns a list of all Users from the DB.
-        /// </summary>
-        [HttpGet("admin/get/all")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(IEnumerable<User>))]
-        [Authorize(Roles = "admin")]
-        public ActionResult GetUsersInfo()
-        {
-            var users = _db.Users.ToList();
-            return new JsonResult(users);
-        }
-
-        /// <summary>
-        /// Returns a specific user by his CPF.
-        /// </summary>
-        /// <param name="cpf">CPF of the user to search. Format it `^[0-9]{11}`</param>
-        [HttpGet("admin/get/{cpf}")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(User))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.NotFound, Type = typeof(HttpResponseMessage))]
-        [Authorize(Roles = "admin")]
-        public ActionResult GetUserInfo(string cpf)
-        {
-            // If no user is found, will let it raise 204 error.
-            // Depending, Could add cpf validation
-            User user = _db.Users.Find(cpf);
-            if (user == null)
-            {
-                var response = new HttpResponseMessage(System.Net.HttpStatusCode.NotFound)
-                {
-                    Content = new StringContent($"User with CPF `{cpf}` not found!"),
-                    ReasonPhrase = "User not found!"
-                };
-                return new JsonResult(response);
-            }
-
+            string? email = claims?.FirstOrDefault(x => x.Type.Equals("email", StringComparison.OrdinalIgnoreCase)).Value;
+            var user = _db.Users.Find(email);
             return new JsonResult(user);
         }
 
         /// <summary>
         /// Deletes a user from DB. If user doesn't exist, will return 400 (BadRequest).
         /// </summary>
-        /// <param name="cpf">CPF of the user to delete from DB</param>
-        [HttpDelete("admin/delete")]
+        /// <param name="email">EMAIL of the user to delete from DB</param>
+        [HttpDelete("delete")]
         [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
-        [Authorize(Roles = "admin")]
-        public ActionResult DeleteUser(string cpf)
+        [Authorize]
+        public ActionResult DeleteUser(string email)
         {
             User userToDelete;
-            bool userExists = UserExists(cpf, out userToDelete);
 
             HttpResponseMessage errorResponse;
-            if (!ValidateUserExists(cpf, out userToDelete, out errorResponse))
+            if (!ValidateUserExists(email, out userToDelete, out errorResponse))
                 return new JsonResult(errorResponse);
 
             _db.Users.Remove(userToDelete);
@@ -100,12 +60,12 @@ namespace Wiseflux.Controllers
         /// Adds a new user to the DB.
         /// </summary>
         /// <param name="newUser">Json of the new user to add. See User Schema for more info</param>
-        [HttpPost("admin/add")]
+        [HttpPost("add")]
+        [AllowAnonymous]
         [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(HttpResponseMessage))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
-        [Authorize(Roles = "admin")]
         public ActionResult AddUser([FromBody] User newUser)
         {
             // Chose to add validation here. Could add in Schemas 
@@ -125,13 +85,13 @@ namespace Wiseflux.Controllers
         /// Edit a specific user from the DB.
         /// </summary>
         /// <param name="user">Data of the user to edit</param>
-        [HttpPut("admin/edit")]
+        [HttpPut("edit")]
         [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.NotFound, Type = typeof(HttpResponseMessage))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
-        [Authorize(Roles = "admin")]
+        [Authorize]
         public ActionResult EditUser([FromBody] User user)
         {
             HttpResponseMessage errorResponse;
@@ -175,23 +135,23 @@ namespace Wiseflux.Controllers
             return true;
         }
 
-        private bool UserExists(string cpf, out User user)
+        private bool UserExists(string email, out User user)
         {
-            user = _db.Users.Find(cpf);
+            user = _db.Users.Find(email);
             return user != null;
         }
 
-        private bool ValidateUserExists(string cpf, out User user, out HttpResponseMessage errorResponse)
+        private bool ValidateUserExists(string email, out User user, out HttpResponseMessage errorResponse)
         {
             user = null;
             errorResponse = null;
-            bool userExists = UserExists(cpf, out user);
+            bool userExists = UserExists(email, out user);
 
             if (!userExists)
             {
                 errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest)
                 {
-                    Content = new StringContent($"User with CPF `{cpf}` does not exists"),
+                    Content = new StringContent($"User with EMAIL `{email}` does not exists"),
                     ReasonPhrase = "User not found!"
                 };
                 return false;

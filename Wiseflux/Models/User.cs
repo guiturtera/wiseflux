@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Wiseflux.Models
 {
@@ -8,13 +10,13 @@ namespace Wiseflux.Models
     public enum EnumUserRoles
     {
         /// <summary>
-        /// Admin have access to all methods.
+        /// Default users have access to specific features
         /// </summary>
-        Admin = 0,
+        Default = 0,
         /// <summary>
-        /// DefaultUser only have access to their data.
+        /// Vip users have access to all the platform features
         /// </summary>
-        DefaultUser = 1
+        Vip = 1
     }
 
     /// <summary>
@@ -23,23 +25,26 @@ namespace Wiseflux.Models
     public class User
     {
         /// <summary>
-        /// 
+        /// Email do usuário
         /// </summary>
+        /// <example>foo@gmail.com</example>
         [Key]
         [Required]
+        [RegularExpression("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")]
         public string Email { get; set; }
         
         /// <summary>
-        ///
+        /// Telefone do usuário
         /// </summary>
         [Required]
         [MinLength(10)]
         public string PhoneNumber { get; set; }
 
         /// <summary>
-        /// 
+        /// Nome do usuário
         /// </summary>
         [Required]
+        [MinLength(4)]
         public string Username { get; set; }
         /// <summary>
         /// Admin = 0
@@ -51,11 +56,23 @@ namespace Wiseflux.Models
         public EnumUserRoles Role { get; set; }
 
         /// <summary>
-        /// 
+        /// Senha do usuário (encriptada)
         /// </summary>
         [Required]
         [DataType(DataType.Password)]
         [MinLength(8)]
         public string Password { get; set; }
+
+        /// <summary>
+        /// Refresh token atrelado ao usuário
+        /// </summary>
+        [JsonIgnore]
+        public string? RefreshToken { get; set; }
+
+        /// <summary>
+        /// Data de expiração do refresh token atrelado ao usuário
+        /// </summary>
+        [JsonIgnore]
+        public DateTime RefreshTokenExpiryTime { get; set; }
     }
 }

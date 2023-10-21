@@ -12,8 +12,8 @@ using Wiseflux.Data;
 namespace Wiseflux.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231019001553_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20231021192403_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,26 +27,44 @@ namespace Wiseflux.Migrations
 
             modelBuilder.Entity("Wiseflux.Models.User", b =>
                 {
-                    b.Property<string>("CPF")
+                    b.Property<string>("Email")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.HasKey("CPF");
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Email");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Email = "guiturtera@hotmail.com",
+                            Password = "/OoMy+WT8ybJ+X9ZlPIMBCaUHO58ShGcZK5a0qwyzA00+PpP",
+                            PhoneNumber = "(11)98741-0155",
+                            RefreshTokenExpiryTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Role = 1,
+                            Username = "guiturtera"
+                        });
                 });
 #pragma warning restore 612, 618
         }

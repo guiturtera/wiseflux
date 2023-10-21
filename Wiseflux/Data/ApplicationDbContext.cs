@@ -8,7 +8,7 @@ namespace Wiseflux.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
+            
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -20,7 +20,15 @@ namespace Wiseflux.Data
             });*/
 
             //builder.Entity<PhoneNumber>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
-
+            // Only to tests
+            builder.Entity<User>().HasData(new User
+            {
+                Email = "guiturtera@hotmail.com",
+                PhoneNumber = "(11)98741-0155",
+                Username = "guiturtera",
+                Role = EnumUserRoles.Vip,
+                Password = "/OoMy+WT8ybJ+X9ZlPIMBCaUHO58ShGcZK5a0qwyzA00+PpP"
+            });
         }
 
         public DbSet<User> Users { get; set; } // STRONG
