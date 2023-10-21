@@ -17,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddAuthorization();
 builder.Services.AddSwaggerGen(c =>
 {
     // Define the Swagger document for each API version
@@ -90,6 +91,9 @@ builder.Services.AddTransient<ITokenService, TokenService>();
 
 var app = builder.Build();
 
+app.UseAuthorization();
+app.UseAuthentication();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -99,7 +103,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
 
 app.MapControllers();
 

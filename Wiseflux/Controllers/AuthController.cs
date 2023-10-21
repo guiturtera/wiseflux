@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
@@ -35,7 +36,7 @@ namespace Wiseflux.Controllers
         [AllowAnonymous]
         [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(HttpResponseMessage))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.NotFound, Type = typeof(UserTokenModel))]
-        public ActionResult<dynamic> Authenticate([FromBody] LoginModel login)
+        public async Task<ActionResult<dynamic>> Authenticate([FromBody] LoginModel login)
         {
             HttpResponseMessage errorResponse;
             var user = _db.Users.Find(login.Email);
@@ -71,7 +72,9 @@ namespace Wiseflux.Controllers
 
         [HttpPost]
         [Route("refresh")]
-        public ActionResult<dynamic> Refresh(RefreshTokenModel refreshTokenModel)
+        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(UserTokenModel))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
+        public async Task<ActionResult<dynamic>> Refresh(RefreshTokenModel refreshTokenModel)
         {
             string accessToken = refreshTokenModel.Token;
             string refreshToken = refreshTokenModel.RefreshToken;
@@ -105,6 +108,22 @@ namespace Wiseflux.Controllers
             });
         }
 
+        [HttpPost("revoke")]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [Authorize]
+        public async Task<ActionResult<dynamic>> Revoke()
+        {
+            var email = User.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Email, StringComparison.OrdinalIgnoreCase)).Value;
+            var user = _db.Users.Find(email);
+
+            if (user == null) return DefaultError("Usuário não existe mais", HttpStatusCode.BadRequest);
+
+            user.RefreshToken = null;
+            _db.SaveChanges();
+            return NoContent();
+        }
+
         private HttpResponseMessage DefaultError(string errorReason, HttpStatusCode httpStatusCode)
         {
             var errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
@@ -117,19 +136,5 @@ namespace Wiseflux.Controllers
             return errorResponse;
         }
 
-
-        /*[HttpPost("revoke")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
-        [Authorize]
-        public IActionResult Revoke()
-        {
-            var username = User.Identity.Name;
-            var user = _userContext.LoginModels.SingleOrDefault(u => u.UserName == username);
-            if (user == null) return BadRequest();
-            user.RefreshToken = null;
-            _userContext.SaveChanges();
-            return NoContent();
-        }*/
     }
 }
