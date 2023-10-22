@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Security.Claims;
 using Wiseflux.Data;
 using Wiseflux.Models;
@@ -22,14 +23,15 @@ namespace Wiseflux.Controllers
         /// Returns info about the current user
         /// </summary>
         [HttpGet("info")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(IEnumerable<User>))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<User>))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
         [Authorize]
-        public ActionResult GetCurrentUserInfo()
+        public async Task<ActionResult> GetCurrentUserInfo()
         {
-            var claims = User.Identities.First().Claims.ToList();
-            string? email = claims?.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Email, StringComparison.OrdinalIgnoreCase)).Value;
+            var email = GetUserEmailFromToken();
             var user = _db.Users.Find(email);
+            if (user == null) return new JsonResult(DefaultError("User not found.", HttpStatusCode.NotFound));
+
             user.Password = "";
 
             return new JsonResult(user);
@@ -38,17 +40,16 @@ namespace Wiseflux.Controllers
         /// <summary>
         /// Deletes a user from DB. If user doesn't exist, will return 400 (BadRequest).
         /// </summary>
-        /// <param name="email">EMAIL of the user to delete from DB</param>
         [HttpDelete("delete")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(void))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
         [Authorize]
-        public ActionResult DeleteUser(string email)
+        public async Task<ActionResult> DeleteUser()
         {
+            string email = GetUserEmailFromToken();
+            
             User userToDelete;
-
             HttpResponseMessage errorResponse;
             if (!ValidateUserExists(email, out userToDelete, out errorResponse))
                 return new JsonResult(errorResponse);
@@ -64,12 +65,12 @@ namespace Wiseflux.Controllers
         /// </summary>
         /// <param name="newUser">Json of the new user to add. See User Schema for more info</param>
         [HttpPost("add")]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(void))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [ProducesResponseType((int)HttpStatusCode.Conflict, Type = typeof(HttpResponseMessage))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
         [AllowAnonymous]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(HttpResponseMessage))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
-        public ActionResult AddUser([FromBody] User newUser)
+        public async Task<ActionResult> AddUser([FromBody] User newUser)
         {
             // Chose to add validation here. Could add in Schemas 
             HttpResponseMessage errorResponse;
@@ -89,20 +90,20 @@ namespace Wiseflux.Controllers
         /// </summary>
         /// <param name="user">Data of the user to edit</param>
         [HttpPut("edit")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Forbidden, Type = typeof(void))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.NotFound, Type = typeof(HttpResponseMessage))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(void))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(HttpResponseMessage))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(HttpResponseMessage))]
         [Authorize]
-        public ActionResult EditUser([FromBody] User user)
+        public async Task<ActionResult> EditUser([FromBody] User user)
         {
             HttpResponseMessage errorResponse;
             if (!ValidUser(user, out errorResponse))
                 return new JsonResult(errorResponse);
+            if (user.Email != GetUserEmailFromToken())
+                return new JsonResult(DefaultError("You can not change the email address of the account!", HttpStatusCode.BadRequest));
 
             user.Password = new UserSecurity().EncryptPassword(user.Password);
-
             _db.Users.Update(user);
             try
             {
@@ -110,12 +111,7 @@ namespace Wiseflux.Controllers
             }
             catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException)
             {
-                errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.NotFound)
-                {
-                    Content = new StringContent($"User with email '{user.Email}' doesn't exist. Try adding before editing."),
-                    ReasonPhrase = "User don't exist"
-                };
-                return new JsonResult(errorResponse);
+                return new JsonResult(DefaultError("User not found.", HttpStatusCode.NotFound));
             }
 
             return Ok();
@@ -127,11 +123,12 @@ namespace Wiseflux.Controllers
             if (!ModelState.IsValid)
             {
                 var allErrors = (string[])ModelState.Values.SelectMany(v => v.Errors.Select(b => b.ErrorMessage));
-                errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest)
+                errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
                     Content = new StringContent(String.Join(',', allErrors)),
                     ReasonPhrase = "Invalid parameters."
                 };
+                Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 return false;
             }
 
@@ -152,7 +149,7 @@ namespace Wiseflux.Controllers
 
             if (!userExists)
             {
-                errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest)
+                errorResponse = new HttpResponseMessage(HttpStatusCode.BadRequest)
                 {
                     Content = new StringContent($"User with EMAIL `{email}` does not exists"),
                     ReasonPhrase = "User not found!"
@@ -166,17 +163,32 @@ namespace Wiseflux.Controllers
         private bool ValidateUserNotExists(string email, out HttpResponseMessage errorResponse)
         {
             errorResponse = null;
-            bool valid = !UserExists(email, out User user);
-            if (!valid)
-            {
-                errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
-                {
-                    Content = new StringContent($"User with email `{email}` already exists"),
-                    ReasonPhrase = "User already exists"
-                };
-            }
+            bool userExists = UserExists(email, out User user);
+            
+            if (userExists) 
+                errorResponse = DefaultError($"User with email `{email}` already exists", HttpStatusCode.Conflict);
 
-            return valid;
+            return !userExists;
+        }
+
+        private HttpResponseMessage DefaultError(string errorReason, HttpStatusCode httpStatusCode)
+        {
+            var errorResponse = new HttpResponseMessage(httpStatusCode)
+            {
+                Content = new StringContent(errorReason),
+                ReasonPhrase = errorReason
+            };
+            Response.StatusCode = (int)(httpStatusCode);
+
+            return errorResponse;
+        }
+
+        private string GetUserEmailFromToken()
+        {
+            List<Claim> claims = User.Identities.First().Claims.ToList();
+            string? email = claims?.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Email, StringComparison.OrdinalIgnoreCase)).Value;
+
+            return email;
         }
     }
 }

@@ -89,6 +89,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"))
     );
 builder.Services.AddTransient<ITokenService, TokenService>();
+builder.Services.AddTransient<AuthService>();
 
 var app = builder.Build();
 

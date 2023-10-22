@@ -52,7 +52,8 @@ namespace Wiseflux.Models
         /// Check EnumUserRoles for more info
         /// </summary>
         [Required]
-        [EnumDataType(typeof(EnumUserRoles), ErrorMessage = "Please verify if you entered a valid role in `EnumUserRoles` Scheme!")]
+        [EnumDataType(typeof(EnumUserRoles), ErrorMessage = "Please verify if you entered a valid role in `EnumUserRoles` Scheme! Options = ['Vip', 'Default']")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public EnumUserRoles Role { get; set; }
 
         /// <summary>

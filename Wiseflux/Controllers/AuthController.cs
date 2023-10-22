@@ -18,93 +18,42 @@ namespace Wiseflux.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly ITokenService _tokenService;
+        private readonly AuthService _authService;
 
-        public AuthController(ApplicationDbContext db, ITokenService tokenService)
+        public AuthController(ApplicationDbContext db, ITokenService tokenService, AuthService authService)
         {
             _db = db;
             _tokenService = tokenService;
+            _authService = authService;
         }
 
         private int hoursTokenExpiration = 2;
         private int hoursRefreshTokenExpiration = 24;
 
         /// <summary>
-        /// Login into the application. This login is uses Bearer Token.
+        /// Login into the application. Returns the user, token and refresh token with their metadata.
         /// </summary>
         /// <param name="login">The specified CPF/Password of your user.</param>
         [HttpPost("login")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(HttpResponseMessage))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.NotFound, Type = typeof(UserTokenModel))]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ServiceResponse<UserTokenModel>))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ServiceResponse<object>))]
         public async Task<ActionResult<dynamic>> Authenticate([FromBody] LoginModel login)
         {
-            HttpResponseMessage errorResponse;
-            var user = _db.Users.Find(login.Email);
-            if (user == null || !new UserSecurity().CheckPassword(login.Password, user.Password))
-            {
-                errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
-                {
-                    Content = new StringContent($"Username or password invalid!"),
-                    ReasonPhrase = "Wrong username/password"
-                };
-                Response.StatusCode = 403;
-                return errorResponse;
-            }
+            var result = await _authService.Authenticate(login);
+            Response.StatusCode = (int)result.Status;
 
-            var tokenExpiryDate = DateTime.UtcNow.AddHours(hoursTokenExpiration);
-            var token = _tokenService.GenerateToken(user, tokenExpiryDate);
-            user.RefreshToken = _tokenService.GenerateRefreshToken();
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(hoursRefreshTokenExpiration);
-
-            _db.SaveChanges();
-            
-            user.Password = "";
-            var userTokenModel = new UserTokenModel
-            {
-                User = user,
-                Token = token,
-                TokenExpiryTime = tokenExpiryDate,
-                RefreshToken = user.RefreshToken,
-                RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
-            };
-            return new JsonResult(userTokenModel);
+            return new JsonResult(result);
         }
 
-        [HttpPost]
-        [Route("refresh")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(UserTokenModel))]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
-        public async Task<ActionResult<dynamic>> Refresh(RefreshTokenModel refreshTokenModel)
+        [HttpPost("refresh")]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(UserTokenModel))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
+        public async Task<ActionResult<dynamic>> Refresh([FromBody] RefreshTokenModel refreshTokenModel)
         {
-            string accessToken = refreshTokenModel.Token;
-            string refreshToken = refreshTokenModel.RefreshToken;
+            var result = await _authService.Refresh(refreshTokenModel);
+            Response.StatusCode = (int)result.Status;
 
-            var userClaims = _tokenService.GetUserFromExpiredToken(accessToken);
-
-            if (userClaims == null) 
-            {
-                return DefaultError("Tokens inválidos.", System.Net.HttpStatusCode.Forbidden);
-            }
-
-            var email = userClaims.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Email, StringComparison.OrdinalIgnoreCase)).Value;
-
-            var user = _db.Users.Find(email);
-
-            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
-                return DefaultError("Tokens inválidos.", HttpStatusCode.Forbidden);
-
-            var tokenExpiryDate = DateTime.UtcNow.AddHours(hoursTokenExpiration);
-            var newAccessToken = _tokenService.GenerateToken(user, tokenExpiryDate);
-            user.RefreshToken = _tokenService.GenerateRefreshToken(); 
-
-            _db.SaveChanges();
-            return Ok(new UserTokenModel()
-            {
-                User = user,
-                Token = newAccessToken,
-                TokenExpiryTime = tokenExpiryDate,
-                RefreshToken = user.RefreshToken,
-                RefreshTokenExpiryTime = user.RefreshTokenExpiryTime
-            });
+            return new JsonResult(result);
         }
 
         [HttpPost("revoke")]
@@ -113,27 +62,10 @@ namespace Wiseflux.Controllers
         [Authorize]
         public async Task<ActionResult<dynamic>> Revoke()
         {
-            var email = User.Claims.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Email, StringComparison.OrdinalIgnoreCase)).Value;
-            var user = _db.Users.Find(email);
+            var result = await _authService.Revoke(User);
+            Response.StatusCode = (int)result.Status;
 
-            if (user == null) return DefaultError("Usuário não existe mais", HttpStatusCode.BadRequest);
-
-            user.RefreshToken = null;
-            _db.SaveChanges();
-            return NoContent();
+            return new JsonResult(result);
         }
-
-        private HttpResponseMessage DefaultError(string errorReason, HttpStatusCode httpStatusCode)
-        {
-            var errorResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Forbidden)
-            {
-                Content = new StringContent(errorReason),
-                ReasonPhrase = errorReason
-            };
-            Response.StatusCode = (int)(httpStatusCode);
-
-            return errorResponse;
-        }
-
     }
 }
