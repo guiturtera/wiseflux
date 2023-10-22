@@ -17,7 +17,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddAuthorization();
 builder.Services.AddSwaggerGen(c =>
 {
     // Define the Swagger document for each API version
@@ -63,12 +62,13 @@ builder.Services.AddSwaggerGen(c =>
 
 
 var key = Encoding.ASCII.GetBytes(Settings.Secret);
+
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(x =>
+    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x =>
 {
     x.RequireHttpsMetadata = false;
     x.SaveToken = true;
@@ -80,6 +80,7 @@ builder.Services.AddAuthentication(x =>
         ValidateAudience = false
     };
 });
+builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -91,8 +92,7 @@ builder.Services.AddTransient<ITokenService, TokenService>();
 
 var app = builder.Build();
 
-app.UseAuthorization();
-app.UseAuthentication();
+app.UseRouting();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -103,6 +103,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Wiseflux.Data;
 using Wiseflux.Models;
 using Wiseflux.Security;
 
 namespace Wiseflux.Controllers
 { 
-    [Route($"api/v1/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -27,8 +28,10 @@ namespace Wiseflux.Controllers
         public ActionResult GetCurrentUserInfo()
         {
             var claims = User.Identities.First().Claims.ToList();
-            string? email = claims?.FirstOrDefault(x => x.Type.Equals("email", StringComparison.OrdinalIgnoreCase)).Value;
+            string? email = claims?.FirstOrDefault(x => x.Type.Equals(ClaimTypes.Email, StringComparison.OrdinalIgnoreCase)).Value;
             var user = _db.Users.Find(email);
+            user.Password = "";
+
             return new JsonResult(user);
         }
 

@@ -33,7 +33,6 @@ namespace Wiseflux.Controllers
         /// </summary>
         /// <param name="login">The specified CPF/Password of your user.</param>
         [HttpPost("login")]
-        [AllowAnonymous]
         [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(HttpResponseMessage))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.NotFound, Type = typeof(UserTokenModel))]
         public async Task<ActionResult<dynamic>> Authenticate([FromBody] LoginModel login)
@@ -109,7 +108,7 @@ namespace Wiseflux.Controllers
         }
 
         [HttpPost("revoke")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.OK, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.NoContent, Type = typeof(void))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
         [Authorize]
         public async Task<ActionResult<dynamic>> Revoke()
