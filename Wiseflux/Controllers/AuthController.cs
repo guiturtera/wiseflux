@@ -16,19 +16,12 @@ namespace Wiseflux.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
-        private readonly ITokenService _tokenService;
         private readonly AuthService _authService;
 
-        public AuthController(ApplicationDbContext db, ITokenService tokenService, AuthService authService)
+        public AuthController(AuthService authService)
         {
-            _db = db;
-            _tokenService = tokenService;
             _authService = authService;
         }
-
-        private int hoursTokenExpiration = 2;
-        private int hoursRefreshTokenExpiration = 24;
 
         /// <summary>
         /// Login into the application. Returns the user, token and refresh token with their metadata.
@@ -57,7 +50,7 @@ namespace Wiseflux.Controllers
         }
 
         [HttpPost("revoke")]
-        [ProducesResponseType((int)System.Net.HttpStatusCode.NoContent, Type = typeof(void))]
+        [ProducesResponseType((int)System.Net.HttpStatusCode.NoContent, Type = typeof(ServiceResponse<object>))]
         [ProducesResponseType((int)System.Net.HttpStatusCode.Unauthorized, Type = typeof(void))]
         [Authorize]
         public async Task<ActionResult<dynamic>> Revoke()

@@ -90,6 +90,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     );
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddTransient<AuthService>();
+builder.Services.AddTransient<UserService>();
 
 var app = builder.Build();
 

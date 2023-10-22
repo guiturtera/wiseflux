@@ -38,7 +38,7 @@ namespace Wiseflux.Services
             _db.SaveChanges();
 
             user.Password = "";
-            return new ServiceResponse<UserTokenModel>(HttpStatusCode.OK, null, generatedToken);
+            return new ServiceResponse<UserTokenModel>(HttpStatusCode.OK, "Success", generatedToken);
         }
 
         public async Task<ServiceResponse<UserTokenModel>> Refresh(RefreshTokenModel refreshTokenModel)
@@ -61,7 +61,7 @@ namespace Wiseflux.Services
             user.RefreshToken = generatedToken.RefreshToken;
             _db.SaveChanges();
 
-            return new ServiceResponse<UserTokenModel>(HttpStatusCode.OK, null, generatedToken);
+            return new ServiceResponse<UserTokenModel>(HttpStatusCode.OK, "Success", generatedToken);
         }
 
         public async Task<ServiceResponse<object>> Revoke(ClaimsPrincipal currentUser)
@@ -75,7 +75,7 @@ namespace Wiseflux.Services
             user.RefreshToken = null;
 
             _db.SaveChanges();
-            return new ServiceResponse<object>(HttpStatusCode.NoContent, "Success", null);
+            return new ServiceResponse<object>(HttpStatusCode.OK, "Success", null);
         }
 
         private UserTokenModel generateNewToken(User user)
