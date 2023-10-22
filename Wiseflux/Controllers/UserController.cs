@@ -63,7 +63,7 @@ namespace Wiseflux.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> AddUser([FromBody] User newUser)
         {
-            var result = await _userService.AddUser(newUser, ModelState);
+            var result = await _userService.AddUser(newUser);
             Response.StatusCode = (int)result.Status;
 
             return new JsonResult(result);
@@ -81,7 +81,7 @@ namespace Wiseflux.Controllers
         [Authorize]
         public async Task<ActionResult> EditUser([FromBody] User user)
         {
-            var result = await _userService.EditUser(user, User, ModelState);
+            var result = await _userService.EditUser(user, User);
             Response.StatusCode = (int)result.Status;
 
             return new JsonResult(result);

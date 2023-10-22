@@ -43,12 +43,8 @@ namespace Wiseflux.Services
             return new ServiceResponse<object>(HttpStatusCode.OK, "Success", null);
         }
 
-        public async Task<ServiceResponse<object>> AddUser(User newUser, ModelStateDictionary modelState)
+        public async Task<ServiceResponse<object>> AddUser(User newUser)
         {
-            string[] fieldWithErrors;
-            if (!ModelValidationHelper.ValidModel(modelState, out fieldWithErrors))
-                return new ServiceResponse<object>(HttpStatusCode.BadRequest, string.Join(", ", fieldWithErrors), null);
-
             User existingUser;
             if (UserExistsByEmail(newUser.Email, out existingUser))
                 return new ServiceResponse<object>(HttpStatusCode.Conflict, "User already exists", null);
@@ -61,12 +57,8 @@ namespace Wiseflux.Services
             return new ServiceResponse<object>(HttpStatusCode.OK, "Success", null);
         }
 
-        public async Task<ServiceResponse<object>> EditUser(User editedUser, ClaimsPrincipal userClaim, ModelStateDictionary modelState)
+        public async Task<ServiceResponse<object>> EditUser(User editedUser, ClaimsPrincipal userClaim)
         {
-            string[] fieldWithErrors;
-            if (!ModelValidationHelper.ValidModel(modelState, out fieldWithErrors))
-                return new ServiceResponse<object>(HttpStatusCode.BadRequest, string.Join(", ", fieldWithErrors), null);
-
             if (editedUser.Email != ClaimsHelper.GetUserEmail(userClaim))
                 return new ServiceResponse<object>(HttpStatusCode.BadRequest, "You can not change the email address of the account!", null);
 
