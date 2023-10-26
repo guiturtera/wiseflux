@@ -13,11 +13,11 @@ namespace Wiseflux.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            /*builder.Entity<Spreadsheet>().HasKey(table => new
+            builder.Entity<Sensor>().HasKey(table => new
             {
                 table.User,
-                table.Day
-            });*/
+                table.SensorId
+            });
 
             //builder.Entity<PhoneNumber>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             // Only to tests
@@ -32,6 +32,6 @@ namespace Wiseflux.Data
         }
 
         public DbSet<User> Users { get; set; } // STRONG
-        //public DbSet<Spreadsheet> Spreadsheets { get; set; } // ASSOCIATIVE
+        public DbSet<Sensor> Sensors { get; set; } // ASSOCIATIVE
     }
 }
