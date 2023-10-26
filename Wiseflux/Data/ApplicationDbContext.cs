@@ -32,6 +32,6 @@ namespace Wiseflux.Data
         }
 
         public DbSet<User> Users { get; set; } // STRONG
-        public DbSet<Sensor> Sensors { get; set; } // ASSOCIATIVE
+        public DbSet<Sensor> Sensors { get; set; } // STRONG
     }
 }

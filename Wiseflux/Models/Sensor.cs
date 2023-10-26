@@ -62,7 +62,6 @@ namespace Wiseflux.Models
         /// <summary>
         /// Unit of the sensor
         /// </summary>
-        [MinLength(2)]
         [Required]
         public string SensorUnit 
         { 
