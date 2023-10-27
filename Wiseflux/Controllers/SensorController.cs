@@ -42,13 +42,29 @@ namespace Wiseflux.Controllers
         /// <summary>
         /// Returns all user sensors
         /// </summary>
+        [HttpPost("get/{sensorId}")]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ServiceResponse<Sensor>))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ServiceResponse<object>))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [Authorize]
+        public async Task<ActionResult> GetSensor(int sensorId)
+        {
+            var result = await _sensorService.GetSensor(sensorId, User);
+            Response.StatusCode = (int)result.Status;
+
+            return new JsonResult(result);
+        }
+
+        /// <summary>
+        /// Returns all user sensors
+        /// </summary>
         [HttpPost("add")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ServiceResponse<object>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
         [Authorize]
-        public async Task<ActionResult> AddSensor([FromBody] Sensor newSensor)
+        public async Task<ActionResult> AddSensor([FromBody] SensorRequest sensorRequest)
         {
-            var result = await _sensorService.AddSensor(newSensor, User);
+            var result = await _sensorService.AddSensor(sensorRequest, User);
             Response.StatusCode = (int)result.Status;
 
             return new JsonResult(result);

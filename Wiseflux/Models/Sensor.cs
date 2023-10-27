@@ -36,18 +36,25 @@ namespace Wiseflux.Models
         [Required]
         [Key]
         public string User { get; set; }
-        
+
         /// <summary>
         /// Sensor id
         /// </summary>
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Required]
         [Key]
         public string SensorId { get; set; }
 
         /// <summary>
+        /// Sensor name
+        /// </summary>
+        [Required]
+        [Key]
+        public string SensorName { get; set; }
+
+        /// <summary>
         /// Generated GUID in Sensor creation
         /// </summary>
-        [JsonIgnore]
         [Required]
         public Guid SensorGuid { get; set; }
 
@@ -62,7 +69,7 @@ namespace Wiseflux.Models
         /// <summary>
         /// Unit of the sensor
         /// </summary>
-        [Required]
+        /// <example>Electricity || Water || Gas</example>
         public string SensorUnit 
         { 
             get 

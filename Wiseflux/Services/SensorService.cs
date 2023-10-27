@@ -23,16 +23,27 @@ namespace Wiseflux.Services
             return new ServiceResponse<IEnumerable<Sensor>>(HttpStatusCode.OK, "Sucesso", sensors);
         }
 
-
-        public async Task<ServiceResponse<object>> AddSensor(Sensor newSensor, ClaimsPrincipal newUser)
+        public async Task<ServiceResponse<Sensor>> GetSensor(int sensorId, ClaimsPrincipal user)
         {
-            //User existingUser;
-            //if (UserExistsByEmail(newUser.Email, out existingUser))
-            //    return new ServiceResponse<object>(HttpStatusCode.Conflict, "User already exists", null);
+            var sensor = _db.Sensors.Find(ClaimsHelper.GetUserEmail(user), sensorId);
 
-            //newUser.Password = new UserSecurity().EncryptPassword(newUser.Password);
-            
-            newSensor.SensorGuid= Guid.NewGuid();
+            if (sensor == null) { return new ServiceResponse<Sensor>(HttpStatusCode.NotFound, "User not found.", null); }
+
+            return new ServiceResponse<Sensor>(HttpStatusCode.OK, "Sucesso", sensor);
+        }
+
+        public async Task<ServiceResponse<object>> AddSensor(SensorRequest sensorRequest, ClaimsPrincipal newUser)
+        {
+            string userEmail = ClaimsHelper.GetUserEmail(newUser);
+            Guid randomGuid = Guid.NewGuid();
+
+            var newSensor = new Sensor()
+            {
+                User = userEmail,
+                SensorName = sensorRequest.SensorName,
+                SensorGuid = randomGuid,
+                SensorType = sensorRequest.SensorType
+            };
 
             _db.Sensors.Add(newSensor);
             _db.SaveChanges();

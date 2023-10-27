@@ -27,7 +27,7 @@ namespace Wiseflux.Models
         /// <summary>
         /// Email do usuário
         /// </summary>
-        /// <example>foo@gmail.com</example>
+        /// <example>guiturtera@hotmail.com</example>
         [Key]
         [Required]
         [RegularExpression("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")]
@@ -59,6 +59,7 @@ namespace Wiseflux.Models
         /// <summary>
         /// Senha do usuário (encriptada)
         /// </summary>
+        /// <example>admin12345</example>
         [Required]
         [DataType(DataType.Password)]
         [MinLength(8)]
