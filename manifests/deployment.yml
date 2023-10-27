@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: wiseflux 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wiseflux
+  template:
+    metadata:
+      labels:
+        app: wiseflux 
+    spec:
+      containers:
+        - name: wiseflux 
+          image: wiseflux.azurecr.io/wiseflux
+          ports:
+          - containerPort: 80
