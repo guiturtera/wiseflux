@@ -92,6 +92,7 @@ builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<SensorService>();
+builder.Services.AddTransient<SensorMeasureService>();
 
 var app = builder.Build();
 

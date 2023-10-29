@@ -12,8 +12,8 @@ using Wiseflux.Data;
 namespace Wiseflux.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231026231538_sensorAdded")]
-    partial class sensorAdded
+    [Migration("20231029160137_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,21 +27,51 @@ namespace Wiseflux.Migrations
 
             modelBuilder.Entity("Wiseflux.Models.Sensor", b =>
                 {
-                    b.Property<string>("User")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("SensorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<string>("SensorId")
-                        .HasColumnType("nvarchar(450)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SensorId"));
 
                     b.Property<Guid>("SensorGuid")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("SensorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("SensorType")
                         .HasColumnType("int");
 
-                    b.HasKey("User", "SensorId");
+                    b.Property<string>("User")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SensorId");
 
                     b.ToTable("Sensors");
+                });
+
+            modelBuilder.Entity("Wiseflux.Models.SensorMeasure", b =>
+                {
+                    b.Property<int>("MeasureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MeasureId"));
+
+                    b.Property<DateTime>("MeasureTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("MeasureValue")
+                        .HasColumnType("float");
+
+                    b.Property<int>("SensorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MeasureId");
+
+                    b.ToTable("SensorMeasures");
                 });
 
             modelBuilder.Entity("Wiseflux.Models.User", b =>

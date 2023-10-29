@@ -30,26 +30,21 @@ namespace Wiseflux.Models
     public class Sensor
     {
         /// <summary>
+        /// Sensor id
+        /// </summary>
+        [Key]
+        public int SensorId { get; set; }
+
+        /// <summary>
         /// User id
         /// </summary>
         [ForeignKey("FK_User")]
-        [Required]
-        [Key]
         public string User { get; set; }
-
-        /// <summary>
-        /// Sensor id
-        /// </summary>
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Required]
-        [Key]
-        public string SensorId { get; set; }
 
         /// <summary>
         /// Sensor name
         /// </summary>
         [Required]
-        [Key]
         public string SensorName { get; set; }
 
         /// <summary>

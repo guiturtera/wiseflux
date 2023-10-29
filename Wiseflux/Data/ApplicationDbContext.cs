@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Emit;
 using Wiseflux.Models;
 
@@ -13,13 +14,9 @@ namespace Wiseflux.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<Sensor>().HasKey(table => new
-            {
-                table.User,
-                table.SensorId
-            });
+            builder.Entity<Sensor>().Property(p => p.SensorId).ValueGeneratedOnAdd();
+            builder.Entity<SensorMeasure>().Property(p => p.MeasureId).ValueGeneratedOnAdd();
 
-            //builder.Entity<PhoneNumber>().Property(x => x.Id).HasDefaultValueSql("NEWID()");
             // Only to tests
             builder.Entity<User>().HasData(new User
             {
@@ -33,5 +30,6 @@ namespace Wiseflux.Data
 
         public DbSet<User> Users { get; set; } // STRONG
         public DbSet<Sensor> Sensors { get; set; } // STRONG
+        public DbSet<SensorMeasure> SensorMeasures { get; set; } // ASSOCIATIVE
     }
 }

@@ -6,11 +6,42 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Wiseflux.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "SensorMeasures",
+                columns: table => new
+                {
+                    MeasureId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SensorId = table.Column<int>(type: "int", nullable: false),
+                    MeasureValue = table.Column<double>(type: "float", nullable: false),
+                    MeasureTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SensorMeasures", x => x.MeasureId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Sensors",
+                columns: table => new
+                {
+                    SensorId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    User = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SensorName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SensorGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SensorType = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Sensors", x => x.SensorId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -37,6 +68,12 @@ namespace Wiseflux.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "SensorMeasures");
+
+            migrationBuilder.DropTable(
+                name: "Sensors");
+
             migrationBuilder.DropTable(
                 name: "Users");
         }
