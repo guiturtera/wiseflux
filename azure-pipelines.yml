@@ -4,6 +4,7 @@
 
 trigger:
 - master
+- dev
 
 resources:
 - repo: self
@@ -23,6 +24,24 @@ variables:
 
 
 stages:
+- stage: SetNamespace
+  displayName: Set Namespace Variable
+  jobs:
+  - job: SetNamespace
+    displayName: Determine Namespace
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - powershell: |
+        if ($env:BUILD_SOURCEBRANCHNAME -eq "master") {
+          echo "##vso[task.setvariable variable=namespace;isOutput=true]master"
+        } else {
+          echo "##vso[task.setvariable variable=namespace;isOutput=true]dev"
+        }
+      env:
+        BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
+      name: setvarStep
+
 - stage: Build
   displayName: Build stage
   jobs:
@@ -46,8 +65,11 @@ stages:
 
 - stage: Deploy
   displayName: Deploy stage
-  dependsOn: Build
-
+  dependsOn: 
+  - Build
+  - SetNamespace
+  variables:
+    namespace: $[ dependencies.SetNamespace.outputs['SetNamespace.setvarStep.namespace'] ]
   jobs:
   - deployment: Deploy
     displayName: Deploy
@@ -64,6 +86,7 @@ stages:
               action: createSecret
               secretName: $(imagePullSecret)
               dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+              namespace: $(namespace)  # Now this will work
 
           - task: KubernetesManifest@0
             displayName: Deploy to Kubernetes cluster
@@ -76,4 +99,4 @@ stages:
                 $(imagePullSecret)
               containers: |
                 $(containerRegistry)/$(imageRepository):$(tag)
-
+              namespace: $(namespace)
