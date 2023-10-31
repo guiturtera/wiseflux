@@ -15,7 +15,7 @@ variables:
   dockerRegistryServiceConnection: '372b9d51-de1e-4d74-841c-6af19b523032'
   imageRepository: 'wiseflux'
   containerRegistry: 'wiseflux.azurecr.io'
-  dockerfilePath: '**/WiseFlux/Dockerfile'
+  dockerfilePath: '**/Wiseflux/Dockerfile'
   tag: '$(Build.BuildId)'
   imagePullSecret: 'wiseflux2c7c-auth'
 
