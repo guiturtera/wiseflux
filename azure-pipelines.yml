@@ -75,7 +75,7 @@ stages:
     displayName: Deploy
     pool:
       vmImage: $(vmImageName)
-    environment: 'guiturterawiseflux.wiseflux'
+    environment: 'Prod.master'
     strategy:
       runOnce:
         deploy:
