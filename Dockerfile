@@ -7,7 +7,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["Wiseflux.csproj", "Wiseflux/"]
+COPY ["Wiseflux/Wiseflux.csproj", "Wiseflux/"]
 RUN dotnet restore "Wiseflux/Wiseflux.csproj"
 COPY . .
 WORKDIR "/src/Wiseflux"
