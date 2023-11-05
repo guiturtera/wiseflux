@@ -15,8 +15,8 @@ namespace Wiseflux.Services
         private readonly ApplicationDbContext _db;
         private readonly ITokenService _tokenService;
 
-        private int hoursTokenExpiration = 2;
-        private int hoursRefreshTokenExpiration = 24;
+        private double hoursTokenExpiration = 2;//2;
+        private double hoursRefreshTokenExpiration = 8;
 
         public AuthService(ApplicationDbContext db, ITokenService tokenService)
         {
@@ -31,7 +31,7 @@ namespace Wiseflux.Services
             if (user == null || !new UserSecurity().CheckPassword(login.Password, user.Password))
                 return new ServiceResponse<UserTokenModel>(HttpStatusCode.NotFound, "Username or password invalid!", null);
 
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(hoursRefreshTokenExpiration);
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddHours(hoursRefreshTokenExpiration);
             var generatedToken = generateNewToken(user);
             user.RefreshToken = generatedToken.RefreshToken;
             
@@ -60,6 +60,8 @@ namespace Wiseflux.Services
             var generatedToken = generateNewToken(user);
             user.RefreshToken = generatedToken.RefreshToken;
             _db.SaveChanges();
+
+            user.Password = "";
 
             return new ServiceResponse<UserTokenModel>(HttpStatusCode.OK, "Success", generatedToken);
         }
