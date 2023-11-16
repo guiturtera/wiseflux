@@ -11,7 +11,7 @@ resources:
 variables:
 
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '38c5c508-1dee-43c3-bceb-43a462cbfb4d'
+  dockerRegistryServiceConnection: 'afcdcae3-ce2c-4f55-bb4e-796758422cd6'
   imageRepository: 'wisefluxdev'
   containerRegistry: 'wisefluxdev.azurecr.io'
   dockerfilePath: '**/Dockerfile'
