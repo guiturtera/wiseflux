@@ -66,36 +66,20 @@ stages:
   displayName: Deploy stage
   dependsOn: 
   - Build
-  - SetNamespace
-  variables:
-    namespace: $[ dependencies.SetNamespace.outputs['SetNamespace.setvarStep.namespace'] ]
   jobs:
   - deployment: Deploy
-    displayName: Deploy
+    displayName: Deploy to Azure Web App for Containers
     pool:
       vmImage: $(vmImageName)
-    environment: 'Dev.dev'
+    environment: 'Prod.master'
     strategy:
       runOnce:
         deploy:
           steps:
-          - task: KubernetesManifest@0
-            displayName: Create imagePullSecret
+          - task: AzureWebAppContainer@1
+            displayName: 'Deploy to Azure Web App for Containers'
             inputs:
-              action: createSecret
-              secretName: $(imagePullSecret)
-              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
-              namespace: $(namespace)  # Now this will work
-
-          - task: KubernetesManifest@0
-            displayName: Deploy to Kubernetes cluster
-            inputs:
-              action: deploy
-              manifests: |
-                $(Pipeline.Workspace)/manifests/deployment.yml
-                $(Pipeline.Workspace)/manifests/service.yml
-              imagePullSecrets: |
-                $(imagePullSecret)
+              azureSubscription: 'Azure for Students(1)(38c5c508-1dee-43c3-bceb-43a462cbfb4d)'
+              appName: 'wiseflux-backend-prod'
               containers: |
                 $(containerRegistry)/$(imageRepository):$(tag)
-              namespace: $(namespace)
