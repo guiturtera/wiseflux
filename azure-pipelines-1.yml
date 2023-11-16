@@ -80,6 +80,6 @@ stages:
             displayName: 'Deploy to Azure Web App for Containers'
             inputs:
               azureSubscription: 'Azure for Students(1)(38c5c508-1dee-43c3-bceb-43a462cbfb4d)'
-              appName: 'wiseflux-backend-prod'
+              appName: 'wiseflux-backend-dev'
               containers: |
                 $(containerRegistry)/$(imageRepository):$(tag)
