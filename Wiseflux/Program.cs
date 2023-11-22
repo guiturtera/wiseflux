@@ -26,8 +26,8 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Wiseflux",
         Version = "v1",
-        Description = "Esse projeto foi feito para centralizar toda a regra de negócio da Wiseflux\r\n" +
-        "Possui autorização JWT, portanto é necessário o login na aplicação para a manipulação de determinados endpoints.",
+        Description = "Esse projeto foi feito para centralizar toda a regra de negÃ³cio da Wiseflux\r\n" +
+        "Possui autorizaÃ§Ã£o JWT, portanto Ã© necessÃ¡rio o login na aplicaÃ§Ã£o para a manipulaÃ§Ã£o de determinados endpoints.",
         Contact = new OpenApiContact() { Name = "Guilherme Turtera", Email = "guiturtera@hotmail.com" }
     });
 
@@ -98,6 +98,8 @@ var app = builder.Build();
 
 app.UseRouting();
 
+app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
@@ -105,7 +107,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 //}
 
-app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
 app.UseHttpsRedirection();
 
 
