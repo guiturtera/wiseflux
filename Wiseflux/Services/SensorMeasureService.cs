@@ -88,5 +88,10 @@ namespace Wiseflux.Services
         {
             return await getAvarageDaysByFormat(sensorId, startDate, endDate, user, "dd/MM/yy");
         }
+
+        public async Task<ServiceResponse<List<SensorMeasure>>> GetAvarageSensorMeasuresByHour(int sensorId, DateTime startDate, DateTime endDate, ClaimsPrincipal user)
+        {
+            return await getAvarageDaysByFormat(sensorId, startDate, endDate, user, "dd/MM/yy hh");
+        }
     }
 }

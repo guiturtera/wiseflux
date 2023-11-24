@@ -57,7 +57,7 @@ namespace Wiseflux.Controllers
         /// <summary>
         /// Gets all user sensor
         /// </summary>
-        [HttpGet("get/averageByMoth/{sensorId}")]
+        [HttpGet("get/averageByMonth/{sensorId}")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ServiceResponse<IEnumerable<SensorMeasure>>))]
         [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ServiceResponse<object>))]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
@@ -81,6 +81,22 @@ namespace Wiseflux.Controllers
         public async Task<dynamic> GetAverageSensorsbByDay([FromRoute] int sensorId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
             dynamic result = await _sensorMeasureService.GetAvarageSensorMeasuresByDay(sensorId, startDate, endDate, User);
+            Response.StatusCode = (int)result.Status;
+
+            return new JsonResult(result);
+        }
+
+        /// <summary>
+        /// Gets all user sensor
+        /// </summary>
+        [HttpGet("get/averageByHour/{sensorId}")]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ServiceResponse<IEnumerable<SensorMeasure>>))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(ServiceResponse<object>))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [Authorize]
+        public async Task<dynamic> GetAverageSensorsbByHour([FromRoute] int sensorId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            dynamic result = await _sensorMeasureService.GetAvarageSensorMeasuresByHour(sensorId, startDate, endDate, User);
             Response.StatusCode = (int)result.Status;
 
             return new JsonResult(result);
