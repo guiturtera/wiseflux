@@ -22,24 +22,24 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 
-#stages:
-#- stage: SetNamespace
-#  displayName: Set Namespace Variable
-#  jobs:
-#  - job: SetNamespace
-#    displayName: Determine Namespace
-#    pool:
-#      vmImage: $(vmImageName)
-#    steps:
-#    - powershell: |
-#        if ($env:BUILD_SOURCEBRANCHNAME -eq "master") {
-#          echo "##vso[task.setvariable variable=namespace;isOutput=true]master"
-#        } else {
-#          echo "##vso[task.setvariable variable=namespace;isOutput=true]dev"
-#        }
-#      env:
-#        BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
-#      name: setvarStep
+stages:
+- stage: SetNamespace
+  displayName: Set Namespace Variable
+  jobs:
+  - job: SetNamespace
+    displayName: Determine Namespace
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - powershell: |
+        if ($env:BUILD_SOURCEBRANCHNAME -eq "master") {
+          echo "##vso[task.setvariable variable=namespace;isOutput=true]master"
+        } else {
+          echo "##vso[task.setvariable variable=namespace;isOutput=true]dev"
+        }
+      env:
+        BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
+      name: setvarStep
 
 - stage: Build
   displayName: Build stage
