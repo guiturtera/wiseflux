@@ -11,9 +11,9 @@ resources:
 variables:
 
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '372b9d51-de1e-4d74-841c-6af19b523032'
-  imageRepository: 'wiseflux'
-  containerRegistry: 'wiseflux.azurecr.io'
+  dockerRegistryServiceConnection: '58c55c09-d745-4a22-93e6-c06e19c9cf30'
+  imageRepository: 'wisefluxprod'
+  containerRegistry: 'wisefluxprod.azurecr.io'
   dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
   imagePullSecret: 'wiseflux2c7c-auth'
@@ -22,24 +22,24 @@ variables:
   vmImageName: 'ubuntu-latest'
 
 
-stages:
-- stage: SetNamespace
-  displayName: Set Namespace Variable
-  jobs:
-  - job: SetNamespace
-    displayName: Determine Namespace
-    pool:
-      vmImage: $(vmImageName)
-    steps:
-    - powershell: |
-        if ($env:BUILD_SOURCEBRANCHNAME -eq "master") {
-          echo "##vso[task.setvariable variable=namespace;isOutput=true]master"
-        } else {
-          echo "##vso[task.setvariable variable=namespace;isOutput=true]dev"
-        }
-      env:
-        BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
-      name: setvarStep
+#stages:
+#- stage: SetNamespace
+#  displayName: Set Namespace Variable
+#  jobs:
+#  - job: SetNamespace
+#    displayName: Determine Namespace
+#    pool:
+#      vmImage: $(vmImageName)
+#    steps:
+#    - powershell: |
+#        if ($env:BUILD_SOURCEBRANCHNAME -eq "master") {
+#          echo "##vso[task.setvariable variable=namespace;isOutput=true]master"
+#        } else {
+#          echo "##vso[task.setvariable variable=namespace;isOutput=true]dev"
+#        }
+#      env:
+#        BUILD_SOURCEBRANCHNAME: $(Build.SourceBranchName)
+#      name: setvarStep
 
 - stage: Build
   displayName: Build stage
@@ -62,24 +62,24 @@ stages:
     - upload: manifests
       artifact: manifests
 
-- stage: Deploy
-  displayName: Deploy stage
-  dependsOn: 
-  - Build
-  jobs:
-  - deployment: Deploy
-    displayName: Deploy to Azure Web App for Containers
-    pool:
-      vmImage: $(vmImageName)
-    environment: 'Prod.master'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebAppContainer@1
-            displayName: 'Deploy to Azure Web App for Containers'
-            inputs:
-              azureSubscription: 'Azure for Students(1)(38c5c508-1dee-43c3-bceb-43a462cbfb4d)'
-              appName: 'wiseflux-backend-prod'
-              containers: |
-                $(containerRegistry)/$(imageRepository):$(tag)
+#- stage: Deploy
+#  displayName: Deploy stage
+#  dependsOn: 
+#  - Build
+#  jobs:
+#  - deployment: Deploy
+#    displayName: Deploy to Azure Web App for Containers
+#    pool:
+#      vmImage: $(vmImageName)
+#    environment: 'Prod.master'
+#    strategy:
+#      runOnce:
+#        deploy:
+#          steps:
+#          - task: AzureWebAppContainer@1
+#            displayName: 'Deploy to Azure Web App for Containers'
+#            inputs:
+#              azureSubscription: 'Azure for Students(1)(38c5c508-1dee-43c3-bceb-43a462cbfb4d)'
+#              appName: 'wiseflux-backend-prod'
+#              containers: |
+#                $(containerRegistry)/$(imageRepository):$(tag)
