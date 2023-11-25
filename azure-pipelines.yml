@@ -16,7 +16,7 @@ variables:
   containerRegistry: 'wisefluxprod.azurecr.io'
   dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
-  imagePullSecret: 'wiseflux2c7c-auth'
+  imagePullSecret: 'wisefluxprod'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
