@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Security.Claims;
 using Wiseflux.Data;
 using Wiseflux.Helpers;
+using Wiseflux.Migrations;
 using Wiseflux.Models;
 using Wiseflux.Security;
 
@@ -74,6 +76,17 @@ namespace Wiseflux.Services
             }
 
             return new ServiceResponse<object>(HttpStatusCode.OK, "Success", null);
+        }
+
+        public async Task<ServiceResponse<List<NotificationModel>>> GetUserNotifications(ClaimsPrincipal userClaim)
+        {
+            User user;
+            if (!UserExistsByClaim(userClaim, out user))
+                return new ServiceResponse<List<NotificationModel>>(HttpStatusCode.NotFound, "User not found", null);
+
+            List <NotificationModel> notifications = _db.Notifications.Where(notification => notification.User == user.Email).ToList();
+
+            return new ServiceResponse<List<NotificationModel>>(HttpStatusCode.OK, "Success", notifications);
         }
 
         private bool UserExistsByClaim(ClaimsPrincipal userClaim, out User user)

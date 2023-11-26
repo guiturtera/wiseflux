@@ -69,7 +69,7 @@ namespace Wiseflux.Models
         { 
             get 
             { 
-                if (SensorType == EnumSensorType.Electricity) { return "mV"; }
+                if (SensorType == EnumSensorType.Electricity) { return "kW"; }
                 else if (SensorType == EnumSensorType.Water) { return "L"; }
                 else if (SensorType == EnumSensorType.Gas) { return "m³"; }
                 return "none";

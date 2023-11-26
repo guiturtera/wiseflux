@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Security.Claims;
 using Wiseflux.Data;
+using Wiseflux.Migrations;
 using Wiseflux.Models;
 using Wiseflux.Security;
 using Wiseflux.Services;
@@ -82,6 +83,21 @@ namespace Wiseflux.Controllers
         public async Task<ActionResult> EditUser([FromBody] User user)
         {
             var result = await _userService.EditUser(user, User);
+            Response.StatusCode = (int)result.Status;
+
+            return new JsonResult(result);
+        }
+
+        /// <summary>
+        /// Returns info about the current user
+        /// </summary>
+        [HttpGet("notifications")]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(ServiceResponse<List<notificationsAdded>>))]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized, Type = typeof(void))]
+        [Authorize]
+        public async Task<ActionResult> GetUserNotifications()
+        {
+            var result = await _userService.GetUserNotifications(User);
             Response.StatusCode = (int)result.Status;
 
             return new JsonResult(result);

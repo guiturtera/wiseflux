@@ -16,6 +16,7 @@ namespace Wiseflux.Data
         {
             builder.Entity<Sensor>().Property(p => p.SensorId).ValueGeneratedOnAdd();
             builder.Entity<SensorMeasure>().Property(p => p.MeasureId).ValueGeneratedOnAdd();
+            builder.Entity<NotificationModel>().Property(p => p.NotificationId).ValueGeneratedOnAdd();
 
             // Only to tests
             builder.Entity<User>().HasData(new User
@@ -31,5 +32,6 @@ namespace Wiseflux.Data
         public DbSet<User> Users { get; set; } // STRONG
         public DbSet<Sensor> Sensors { get; set; } // STRONG
         public DbSet<SensorMeasure> SensorMeasures { get; set; } // ASSOCIATIVE
+        public DbSet<NotificationModel> Notifications { get; set; } // ASSOCIATIVE
     }
 }
