@@ -14,6 +14,9 @@ namespace Wiseflux.Models
 
         public DateTime NotificationTime { get; set; }
 
+        [ForeignKey("FK_Sensor")]
+        public int Sensor { get; set; }
+
         /// <summary>
         /// User id
         /// </summary>
