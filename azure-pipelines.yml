@@ -54,7 +54,7 @@ stages:
         sed -i 's#"DefaultConnection": ".*"#"DefaultConnection": "$(DBConnectionString)"#' Wiseflux/appsettings.json
       displayName: 'Replace Connection String in appsettings.json'
     - script: |
-        sed -i 's#public static string Secret = ".*";#public static string Secret = "$(JWTSecret)";#' Settings.cs
+        sed -i 's#public static string Secret = ".*";#public static string Secret = "$(JWTSecret)";#' Wiseflux/Settings.cs
       displayName: 'Replace JWT Secret in Settings.cs'
 
     - task: Docker@2
