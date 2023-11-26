@@ -17,6 +17,7 @@ variables:
   dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
   imagePullSecret: 'wisefluxprod'
+  DBConnectionString: $(DBConnectionString)
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -50,14 +51,6 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-    - task: AzureKeyVault@2
-      displayName: 'Fetch Secrets from Azure Key Vault'
-      inputs:
-        azureSubscription: 'Azure for Students(7)(38c5c508-1dee-43c3-bceb-43a462cbfb4d)'
-        KeyVaultName: 'wiseflux'
-        SecretsFilter: 'DBConnectionString'
-        RunAsPreJob: false
-
     - script: |
         sed -i 's#"DefaultConnection": ".*"#"DefaultConnection": "$(DBConnectionString)"#' Wiseflux/appsettings.json
       displayName: 'Replace Connection String in appsettings.json'
