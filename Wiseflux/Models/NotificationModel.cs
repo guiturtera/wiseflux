@@ -12,6 +12,8 @@ namespace Wiseflux.Models
         [Key]
         public int NotificationId { get; set; }
 
+        public DateTime NotificationTime { get; set; }
+
         /// <summary>
         /// User id
         /// </summary>
