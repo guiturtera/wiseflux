@@ -17,7 +17,6 @@ variables:
   dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
   imagePullSecret: 'wisefluxprod'
-  DBConnectionString: $(DBConnectionString)
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
