@@ -50,12 +50,19 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
+
     - script: |
-        sed -i 's#"DefaultConnection": ".*"#"DefaultConnection": "$(DBConnectionString)"#' Wiseflux/appsettings.json
+        sed -i "s#\"DefaultConnection\": \".*\"#\"DefaultConnection\": \"$DB_CONNECTION_STRING\"#" Wiseflux/appsettings.json
       displayName: 'Replace Connection String in appsettings.json'
+      env:
+        DB_CONNECTION_STRING: $(DBConnectionString)
+
     - script: |
-        sed -i 's#public static string Secret = ".*";#public static string Secret = "$(JWTSecret)";#' Wiseflux/Settings.cs
+        sed -i "s#public static string Secret = \".*\";#public static string Secret = \"$JWT_SECRET\";#" Wiseflux/Settings.cs
       displayName: 'Replace JWT Secret in Settings.cs'
+      env:
+        JWT_SECRET: $(JWTSecret)
+
     - script: |
         cat Wiseflux/appsettings.json
       displayName: 'Print appsettings.json'
