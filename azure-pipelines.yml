@@ -56,6 +56,12 @@ stages:
     - script: |
         sed -i 's#public static string Secret = ".*";#public static string Secret = "$(JWTSecret)";#' Wiseflux/Settings.cs
       displayName: 'Replace JWT Secret in Settings.cs'
+    - script: |
+        cat Wiseflux/appsettings.json
+      displayName: 'Print appsettings.json'
+    - script: |
+        cat Wiseflux/Settings.cs
+      displayName: 'Print Settings.cs'
 
     - task: Docker@2
       displayName: Build and push an image to container registry
