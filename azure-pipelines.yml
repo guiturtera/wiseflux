@@ -50,7 +50,13 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
-
+    - script: |
+        echo "DBConnectionString: $DB_CONNECTION_STRING"
+        echo "JWTSecret: $JWT_SECRET"
+      displayName: 'Print Variables'
+      env:
+        DB_CONNECTION_STRING: $(DBConnectionString)
+        JWT_SECRET: $(JWTSecret)
     - script: |
         sed -i "s#\"DefaultConnection\": \".*\"#\"DefaultConnection\": \"$DB_CONNECTION_STRING\"#" Wiseflux/appsettings.json
       displayName: 'Replace Connection String in appsettings.json'
