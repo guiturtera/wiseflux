@@ -9,17 +9,25 @@ resources:
 - repo: self
 
 variables:
+- group: backend
 
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: 'wiseflux'
-  imageRepository: 'wiseflux'
-  containerRegistry: 'wiseflux.azurecr.io'
-  dockerfilePath: '**/Dockerfile'
-  tag: '$(Build.BuildId)'
-  imagePullSecret: 'wisefluxprod'
+- name: dockerRegistryServiceConnection
+  value: 'wiseflux'
+- name: imageRepository
+  value: 'wiseflux'
+- name: containerRegistry
+  value: 'wiseflux.azurecr.io'
+- name: dockerfilePath
+  value: '**/Dockerfile'
+- name: tag
+  value: '$(Build.BuildId)'
+- name: imagePullSecret
+  value: 'wisefluxprod'
 
   # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+- name: vmImageName
+  value: 'ubuntu-latest'
 
 
 stages:
